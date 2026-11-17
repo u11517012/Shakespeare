@@ -1,12 +1,16 @@
 :root {
-  --bg-parchment: #f5f0e6;
-  --card-bg: #fbf8f1;
-  --ink-primary: #2c241d;
-  --ink-secondary: #5c4f42;
-  --accent-burgundy: #722f37;
-  --accent-gold: #b08d57;
-  --border-subtle: #dcd3c1;
-  --shadow-soft: 0 12px 32px rgba(44, 36, 29, 0.08);
+  --bg-parchment: #f3ece0;
+  --bg-paper-light: #fbf7ef;
+  --bg-card-inner: #f8f2e6;
+  --ink-primary: #241b15;
+  --ink-secondary: #58483c;
+  --ink-muted: #857466;
+  --accent-burgundy: #6e2226;
+  --accent-burgundy-hover: #52171a;
+  --accent-gold: #a67c37;
+  --accent-gold-light: #d6bc8b;
+  --border-sepia: #d5c6b0;
+  --shadow-book: 0 22px 50px rgba(36, 27, 21, 0.16), 0 4px 12px rgba(36, 27, 21, 0.08);
 }
 
 * {
@@ -15,152 +19,232 @@
   padding: 0;
 }
 
-body {
+html, body {
+  height: 100%;
+  overflow: hidden; /* 鎖定全螢幕，不出現外層滾動條 */
   background-color: var(--bg-parchment);
   color: var(--ink-primary);
-  font-family: "Cormorant Garamond", "Noto Serif TC", Georgia, serif;
-  line-height: 1.75;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  font-family: "Noto Serif TC", "Cormorant Garamond", Georgia, serif;
 }
 
-/* 細微紙張紋理質感 */
+/* 羊皮紙纖維紋理與古典暗角 */
 .paper-texture {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(176, 141, 87, 0.08) 1px, transparent 0);
-  background-size: 24px 24px;
-  z-index: -1;
+  z-index: 0;
+  opacity: 0.45;
+  background-image: 
+    radial-gradient(rgba(120, 92, 62, 0.09) 1px, transparent 0),
+    radial-gradient(rgba(82, 58, 36, 0.06) 1px, transparent 0);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 13px;
 }
 
-/* 頁首 */
+.vignette-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(circle at center, transparent 58%, rgba(62, 46, 32, 0.16) 100%);
+}
+
+/* 主視窗容器：精準分配垂直空間 */
+.app-viewport {
+  position: relative;
+  z-index: 2;
+  height: 100dvh;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 26px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 頂部標題區 */
 .site-header {
   text-align: center;
-  padding: 2.8rem 1.5rem 1.5rem;
-  max-width: 820px;
-  margin: 0 auto;
+  flex-shrink: 0;
 }
 
-.subtitle {
-  font-size: 0.85rem;
-  letter-spacing: 0.25em;
+.title-ornament {
+  font-family: "Cinzel", "Cormorant Garamond", serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.28em;
   color: var(--accent-gold);
-  font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin-bottom: 1px;
 }
 
 .site-header h1 {
-  font-size: clamp(1.9rem, 4vw, 2.7rem);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
   font-weight: 700;
+  letter-spacing: 0.14em;
   color: var(--ink-primary);
-  letter-spacing: 0.06em;
-  margin-bottom: 0.6rem;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-.description {
-  color: var(--ink-secondary);
-  font-size: 1.05rem;
-}
-
-/* A-Z 字母索引 */
+/* A-Z 字母選單：放大、古典金屬書籤/活字印章風格 */
 .alphabet-nav {
-  max-width: 980px;
-  margin: 0.5rem auto 2rem;
-  padding: 0 1.2rem;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
 }
 
 .alphabet-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 5px;
+  padding: 5px 10px;
+  background: rgba(251, 247, 239, 0.72);
+  border-top: 1px solid var(--border-sepia);
+  border-bottom: 1px solid var(--border-sepia);
+  border-radius: 6px;
 }
 
 .alpha-btn {
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 1px solid var(--border-subtle);
-  background: var(--card-bg);
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-sepia);
+  background: linear-gradient(180deg, #fdfaf3 0%, #efe6d5 100%);
   color: var(--ink-secondary);
-  font-family: "Cormorant Garamond", serif;
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-family: "Cinzel", "Cormorant Garamond", serif;
+  font-size: 1.08rem;
+  font-weight: 700;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(36, 27, 21, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.alpha-btn::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  transition: border-color 0.22s ease;
 }
 
 .alpha-btn:hover {
+  transform: translateY(-2px);
   border-color: var(--accent-gold);
   color: var(--accent-burgundy);
-  transform: translateY(-2px);
+  background: #fffdf8;
+  box-shadow: 0 5px 12px rgba(110, 34, 38, 0.14);
+}
+
+.alpha-btn:hover::after {
+  border-color: rgba(166, 124, 55, 0.35);
 }
 
 .alpha-btn.active {
-  background: var(--accent-burgundy);
-  color: #fffdf9;
-  border-color: var(--accent-burgundy);
-  box-shadow: 0 4px 10px rgba(114, 47, 55, 0.25);
+  background: linear-gradient(145deg, #7d262b 0%, #59181c 100%);
+  color: #fbf5e8;
+  border-color: var(--accent-gold);
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 6px 14px rgba(110, 34, 38, 0.28), inset 0 1px 1px rgba(255, 230, 185, 0.35);
 }
 
-/* 主要內容卡片 */
+.alpha-btn.active::after {
+  border-color: rgba(214, 188, 139, 0.55);
+}
+
+/* 主要對開書本卡片 */
 .lexicon-container {
-  max-width: 1060px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 1.5rem 3rem;
   flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
 }
 
 .lexicon-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-subtle);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-paper-light);
+  border: 1px solid var(--border-sepia);
   border-radius: 8px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-book);
   display: grid;
-  grid-template-columns: 1fr 1.25fr;
-  gap: 2.5rem;
-  padding: 2.5rem;
-  align-items: start;
+  grid-template-columns: 1.06fr 1fr;
+  overflow: hidden;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
-/* 左側油畫區 */
+.lexicon-card.fade-switch {
+  opacity: 0.35;
+  transform: scale(0.994);
+}
+
+/* 中央書脊陰影 */
+.book-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 51.4%;
+  width: 28px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(
+    90deg,
+    rgba(36, 27, 21, 0) 0%,
+    rgba(36, 27, 21, 0.05) 38%,
+    rgba(36, 27, 21, 0.13) 50%,
+    rgba(36, 27, 21, 0.05) 62%,
+    rgba(36, 27, 21, 0) 100%
+  );
+}
+
+/* 左頁：畫作展示區 */
 .artwork-section {
+  padding: 18px 24px 14px;
+  background: linear-gradient(135deg, #f5ede0 0%, #ede2d0 100%);
+  border-right: 1px solid rgba(166, 124, 55, 0.25);
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
+  min-height: 0;
 }
 
 .oil-frame {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  background: #ebe4d5;
-  padding: 12px;
-  border: 2px solid var(--accent-gold);
-  box-shadow: inset 0 0 18px rgba(44, 36, 29, 0.15), 0 8px 20px rgba(44, 36, 29, 0.12);
-  border-radius: 4px;
   position: relative;
-  overflow: hidden;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100% - 30px);
+  padding: 9px;
+  background: #2b2018;
+  border: 2px solid var(--accent-gold);
+  border-radius: 3px;
+  box-shadow: 
+    0 12px 28px rgba(28, 20, 14, 0.24),
+    inset 0 0 0 2px #5c4326,
+    inset 0 0 14px rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .oil-frame img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  border: 1px solid rgba(176, 141, 87, 0.4);
 }
 
 .image-fallback {
   text-align: center;
-  padding: 1.5rem;
-  color: var(--ink-secondary);
+  color: #e6dac8;
+  padding: 20px;
 }
 
 .image-fallback.hidden {
@@ -170,219 +254,293 @@ body {
 .fallback-icon {
   font-size: 2.2rem;
   display: block;
-  margin-bottom: 0.6rem;
-}
-
-.image-fallback code {
-  display: inline-block;
-  margin-top: 0.5rem;
-  background: rgba(176, 141, 87, 0.15);
-  padding: 0.15rem 0.45rem;
-  border-radius: 3px;
-  font-size: 0.85rem;
+  margin-bottom: 8px;
 }
 
 .art-note {
-  margin-top: 0.85rem;
-  font-size: 0.9rem;
-  color: var(--ink-secondary);
+  margin-top: 8px;
+  font-size: 0.84rem;
   font-style: italic;
+  color: var(--ink-secondary);
   text-align: center;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 
-/* 右側文字區 */
+/* 右頁：文學手稿與賞析區（修正重點：從頂部完整呈現，絕不裁切單字） */
+.content-section {
+  padding: 18px 28px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 0;
+  background-image: radial-gradient(circle at top right, rgba(214, 188, 139, 0.14), transparent 55%);
+}
+
+.content-scroll-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly; /* 均勻分配垂直空間，避免溢出被切頭 */
+  gap: 6px;
+  overflow: hidden;
+}
+
+/* 單字標題與首字下沉徽章 */
 .word-header {
   display: flex;
   align-items: center;
-  gap: 1.1rem;
-  margin-bottom: 0.9rem;
+  gap: 14px;
+  flex-shrink: 0;
 }
 
 .letter-badge {
-  width: 3.4rem;
-  height: 3.4rem;
-  background: var(--accent-burgundy);
-  color: #fffdf9;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--accent-gold);
+  background: linear-gradient(145deg, #fbf6ec, #eadcc5);
+  color: var(--accent-burgundy);
+  font-family: "Cinzel", "Cormorant Garamond", serif;
   font-size: 2rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  flex-shrink: 0;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 3px var(--bg-paper-light), 0 4px 10px rgba(36, 27, 21, 0.08);
+}
+
+.word-title-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .word-title-group h2 {
-  font-size: 2.3rem;
-  line-height: 1.15;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.75rem, 2.5vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.1;
   color: var(--ink-primary);
+  letter-spacing: 0.02em;
 }
 
 .phonetic-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem;
-  margin-top: 0.25rem;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .phonetic {
-  color: var(--ink-secondary);
+  font-family: "Cormorant Garamond", serif;
   font-size: 1.05rem;
+  color: var(--ink-muted);
+  font-style: italic;
 }
 
 .pos-tag {
-  font-size: 0.82rem;
-  padding: 0.1rem 0.55rem;
-  border: 1px solid var(--accent-gold);
-  color: var(--accent-burgundy);
-  border-radius: 999px;
+  font-size: 0.76rem;
+  padding: 2px 8px;
+  border: 1px solid var(--border-sepia);
+  background: #f2e9d8;
+  color: var(--ink-secondary);
+  border-radius: 3px;
 }
 
 .word-meaning {
-  font-size: 1.15rem;
+  font-size: clamp(0.98rem, 1.25vw, 1.1rem);
   font-weight: 600;
-  color: var(--ink-primary);
-  margin-bottom: 1.2rem;
-}
-
-.divider {
-  border: none;
-  border-top: 1px solid var(--border-subtle);
-  margin: 1.2rem 0;
-}
-
-/* 音檔播放按鈕 */
-.audio-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.32rem 0.78rem;
-  font-family: "Noto Serif TC", serif;
-  font-size: 0.85rem;
   color: var(--accent-burgundy);
-  background: transparent;
-  border: 1px solid var(--accent-burgundy);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 
-.audio-btn:hover,
-.audio-btn.playing {
-  background: var(--accent-burgundy);
-  color: #fffdf9;
+/* 古典星芒分隔線 */
+.literary-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent-gold);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.literary-divider::before,
+.literary-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-sepia), transparent);
 }
 
-/* 金句框 */
+/* 劇本金句框 */
 .quote-box {
-  background: rgba(235, 228, 213, 0.45);
+  position: relative;
+  padding: 10px 14px;
+  background: rgba(242, 233, 216, 0.55);
   border-left: 3px solid var(--accent-burgundy);
-  padding: 1.25rem 1.4rem;
   border-radius: 0 6px 6px 0;
-  margin-bottom: 1.4rem;
+  flex-shrink: 0;
 }
 
 .quote-top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.7rem;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .play-source {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--accent-burgundy);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  letter-spacing: 0.05em;
 }
 
 .quote-en {
-  font-size: 1.32rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.05rem, 1.38vw, 1.26rem);
   font-style: italic;
   font-weight: 600;
+  line-height: 1.36;
   color: var(--ink-primary);
-  line-height: 1.5;
-  margin-bottom: 0.55rem;
+  margin-bottom: 4px;
 }
 
 .quote-zh {
-  font-size: 1rem;
+  font-size: clamp(0.88rem, 1.05vw, 0.95rem);
+  line-height: 1.48;
   color: var(--ink-secondary);
 }
 
 /* 劇場筆記 */
+.commentary-box {
+  flex-shrink: 0;
+}
+
 .commentary-box h3 {
-  font-size: 0.95rem;
-  letter-spacing: 0.12em;
+  font-size: 0.84rem;
+  letter-spacing: 0.16em;
   color: var(--accent-gold);
-  margin-bottom: 0.35rem;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.commentary-box h3::before {
+  content: "✒";
+  font-size: 0.88rem;
 }
 
 .commentary-box p {
-  font-size: 1.02rem;
+  font-size: clamp(0.86rem, 1.02vw, 0.94rem);
+  line-height: 1.56;
   color: var(--ink-primary);
+  text-align: justify;
 }
 
-/* 音檔狀態列 */
+/* 音檔按鈕 */
+.audio-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 0.78rem;
+  color: var(--ink-primary);
+  background: #fbf7ef;
+  border: 1px solid var(--accent-gold);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.audio-btn:hover {
+  background: var(--accent-burgundy);
+  border-color: var(--accent-burgundy);
+  color: #fbf7ef;
+}
+
+.audio-btn.playing {
+  background: var(--accent-burgundy);
+  color: #fbf7ef;
+  box-shadow: 0 0 0 3px rgba(110, 34, 38, 0.2);
+}
+
+/* 底部翻頁導覽 */
+.card-footer-area {
+  flex-shrink: 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-sepia);
+}
+
 .audio-status {
-  margin-top: 1rem;
-  min-height: 1.5rem;
-  font-size: 0.85rem;
+  min-height: 15px;
+  font-size: 0.75rem;
   color: var(--accent-burgundy);
+  text-align: center;
+  margin-bottom: 3px;
 }
 
-/* 底部切換按鈕 */
 .card-footer-nav {
-  margin-top: 1.6rem;
-  padding-top: 1.1rem;
-  border-top: 1px dashed var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .nav-arrow-btn {
-  background: none;
-  border: 1px solid var(--border-subtle);
-  padding: 0.45rem 1rem;
-  border-radius: 4px;
+  padding: 5px 15px;
   font-family: "Noto Serif TC", serif;
-  font-size: 0.92rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--ink-primary);
+  background: transparent;
+  border: 1px solid var(--border-sepia);
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .nav-arrow-btn:hover {
+  background: var(--accent-burgundy);
   border-color: var(--accent-burgundy);
-  color: var(--accent-burgundy);
+  color: #fbf7ef;
 }
 
 .progress-indicator {
-  font-size: 0.95rem;
+  font-family: "Cinzel", "Cormorant Garamond", serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   color: var(--ink-secondary);
 }
 
-/* 頁尾 */
-.site-footer {
-  text-align: center;
-  padding: 1.5rem;
-  font-size: 0.85rem;
-  color: var(--ink-secondary);
-  border-top: 1px solid var(--border-subtle);
-}
-
-/* 響應式設計 */
-@media (max-width: 820px) {
+/* 小螢幕手機板自適應 */
+@media (max-width: 900px) {
+  html, body {
+    overflow-y: auto;
+    height: auto;
+  }
+  .app-viewport {
+    height: auto;
+    min-height: 100dvh;
+    padding: 12px 14px 24px;
+  }
   .lexicon-card {
     grid-template-columns: 1fr;
-    padding: 1.6rem;
-    gap: 1.8rem;
+    height: auto;
   }
-
+  .book-spine {
+    display: none;
+  }
   .oil-frame {
-    max-width: 380px;
+    height: 260px;
+    max-height: none;
   }
 }

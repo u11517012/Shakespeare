@@ -7,96 +7,98 @@
   <!-- 引入古典襯線字體與繁體中文明體 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div class="paper-texture"></div>
+  <div class="vignette-overlay"></div>
 
-  <header class="site-header">
-    <p class="subtitle">THE BARD'S CABINET OF CURIOSITIES</p>
-    <h1>莎士比亞文青詞彙圖書館</h1>
-    <p class="description">從 A 到 Z，以二十六幅印象派光影與劇本金句，收藏伊莉莎白時代的詩意名詞。</p>
-  </header>
+  <div class="app-viewport">
+    <!-- 頂部：精簡典雅書標 -->
+    <header class="site-header">
+      <div class="title-ornament">❧ THE BARD'S CABINET OF CURIOSITIES ❧</div>
+      <h1>莎士比亞文青詞彙圖書館</h1>
+    </header>
 
-  <!-- A-Z 字母索引導覽列 -->
-  <nav class="alphabet-nav" aria-label="A 到 Z 詞彙索引">
-    <div id="alphabet-list" class="alphabet-grid"></div>
-  </nav>
+    <!-- A-Z 字母索引導覽列（放大、古典書籤印章設計） -->
+    <nav class="alphabet-nav" aria-label="A 到 Z 詞彙索引">
+      <div id="alphabet-list" class="alphabet-grid"></div>
+    </nav>
 
-  <!-- 主要詞彙展示區 -->
-  <main class="lexicon-container">
-    <article id="lexicon-card" class="lexicon-card">
-      <!-- 左側：印象派油畫框 -->
-      <div class="artwork-section">
-        <div class="oil-frame">
-          <img id="word-image" src="" alt="" />
-          <div id="image-fallback" class="image-fallback hidden">
-            <span class="fallback-icon">🎨</span>
-            <p id="fallback-caption"></p>
-            <small>請將油畫存為 <code id="expected-img-path"></code></small>
+    <!-- 主要詞彙展示區：對開精裝書頁 -->
+    <main class="lexicon-container">
+      <article id="lexicon-card" class="lexicon-card">
+        <!-- 左頁：印象派油畫框 -->
+        <div class="artwork-section">
+          <div class="oil-frame">
+            <img id="word-image" src="" alt="" />
+            <div id="image-fallback" class="image-fallback hidden">
+              <span class="fallback-icon">🎨</span>
+              <p id="fallback-caption"></p>
+              <small>請將油畫存為 <code id="expected-img-path"></code></small>
+            </div>
           </div>
+          <p id="art-note" class="art-note"></p>
         </div>
-        <p id="art-note" class="art-note"></p>
-      </div>
 
-      <!-- 右側：詞彙、音檔控制與金句賞析 -->
-      <div class="content-section">
-        <div class="word-header">
-          <span id="letter-badge" class="letter-badge">A</span>
-          <div class="word-title-group">
-            <h2 id="word-title">Apparition</h2>
-            <div class="phonetic-row">
-              <span id="word-phonetic" class="phonetic">/ˌæpəˈrɪʃən/</span>
-              <span id="word-pos" class="pos-tag">名詞</span>
-              <!-- 單字發音按鈕 -->
-              <button id="play-word-btn" class="audio-btn" type="button" title="播放單字發音">
-                <span class="icon">🔊</span> 單字發音
-              </button>
+        <!-- 中央書脊陰影裝飾 -->
+        <div class="book-spine" aria-hidden="true"></div>
+
+        <!-- 右頁：詞彙、音檔控制與金句賞析 -->
+        <div class="content-section">
+          <div class="content-scroll-inner">
+            <div class="word-header">
+              <span id="letter-badge" class="letter-badge">A</span>
+              <div class="word-title-group">
+                <h2 id="word-title">Apparition</h2>
+                <div class="phonetic-row">
+                  <span id="word-phonetic" class="phonetic">/ˌæpəˈrɪʃən/</span>
+                  <span id="word-pos" class="pos-tag">名詞</span>
+                  <button id="play-word-btn" class="audio-btn" type="button" title="播放單字發音">
+                    <span class="icon">🔊</span> 單字發音
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p id="word-meaning" class="word-meaning"></p>
+
+            <div class="literary-divider"><span>✦</span></div>
+
+            <!-- 劇本金句區塊 -->
+            <section class="quote-box">
+              <div class="quote-top-bar">
+                <span id="play-source" class="play-source">《馬克白》 Macbeth</span>
+                <button id="play-quote-btn" class="audio-btn quote-audio-btn" type="button" title="播放金句朗讀">
+                  <span class="icon">🎙️</span> 朗讀金句
+                </button>
+              </div>
+
+              <blockquote id="quote-en" class="quote-en"></blockquote>
+              <p id="quote-zh" class="quote-zh"></p>
+            </section>
+
+            <!-- 文青賞析 -->
+            <section class="commentary-box">
+              <h3>劇場筆記</h3>
+              <p id="word-commentary"></p>
+            </section>
+          </div>
+
+          <!-- 底部：狀態提示與鍵盤/按鈕翻頁 -->
+          <div class="card-footer-area">
+            <div id="audio-status" class="audio-status" aria-live="polite"></div>
+            <div class="card-footer-nav">
+              <button id="prev-btn" class="nav-arrow-btn" type="button" title="按鍵盤左鍵 ← 切換">← 上一頁</button>
+              <span id="progress-indicator" class="progress-indicator">FOLIO I / XXVI</span>
+              <button id="next-btn" class="nav-arrow-btn" type="button" title="按鍵盤右鍵 → 切換">下一頁 →</button>
             </div>
           </div>
         </div>
-
-        <p id="word-meaning" class="word-meaning"></p>
-
-        <hr class="divider" />
-
-        <!-- 劇本金句區塊 -->
-        <section class="quote-box">
-          <div class="quote-top-bar">
-            <span id="play-source" class="play-source">《馬克白》 Macbeth</span>
-            <!-- 金句朗讀按鈕 -->
-            <button id="play-quote-btn" class="audio-btn quote-audio-btn" type="button" title="播放金句朗讀">
-              <span class="icon">🎙️</span> 朗讀金句
-            </button>
-          </div>
-
-          <blockquote id="quote-en" class="quote-en"></blockquote>
-          <p id="quote-zh" class="quote-zh"></p>
-        </section>
-
-        <!-- 文青賞析 -->
-        <section class="commentary-box">
-          <h3>劇場筆記</h3>
-          <p id="word-commentary"></p>
-        </section>
-
-        <!-- 音檔狀態與檔案路徑提示（方便替換音檔時對照） -->
-        <div id="audio-status" class="audio-status" aria-live="polite"></div>
-
-        <!-- 上一個 / 下一個切換 -->
-        <div class="card-footer-nav">
-          <button id="prev-btn" class="nav-arrow-btn" type="button">← 上一個字母</button>
-          <span id="progress-indicator" class="progress-indicator">1 / 26</span>
-          <button id="next-btn" class="nav-arrow-btn" type="button">下一個字母 →</button>
-        </div>
-      </div>
-    </article>
-  </main>
-
-  <footer class="site-footer">
-    <p>Shakespearean Lexicon for Hipsters · 音檔路徑：<code>assets/audio/words/</code> 與 <code>assets/audio/quotes/</code></p>
-  </footer>
+      </article>
+    </main>
+  </div>
 
   <!-- 隱藏的 HTML5 Audio 播放器 -->
   <audio id="audio-player" preload="none"></audio>

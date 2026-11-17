@@ -1,187 +1,234 @@
 document.addEventListener("DOMContentLoaded", () => {
-  if (typeof LEXICON_DATA === "undefined" || !Array.isArray(LEXICON_DATA)) {
-    console.error("找不到 LEXICON_DATA，請確認 js/data.js 是否正確載入。");
-    return;
-  }
+  const alphabetListEl = document.getElementById("alphabet-list");
+  const lexiconCardEl = document.getElementById("lexicon-card");
+  const letterBadgeEl = document.getElementById("letter-badge");
+  const wordTitleEl = document.getElementById("word-title");
+  const wordPhoneticEl = document.getElementById("word-phonetic");
+  const wordPosEl = document.getElementById("word-pos");
+  const wordMeaningEl = document.getElementById("word-meaning");
+  const playSourceEl = document.getElementById("play-source");
+  const quoteEnEl = document.getElementById("quote-en");
+  const quoteZhEl = document.getElementById("quote-zh");
+  const wordCommentaryEl = document.getElementById("word-commentary");
+  const artNoteEl = document.getElementById("art-note");
 
-  let currentIndex = 0;
-  let currentAudio = null;
-
-  const alphabetList = document.getElementById("alphabet-list");
-  const wordImage = document.getElementById("word-image");
-  const imageFallback = document.getElementById("image-fallback");
-  const fallbackCaption = document.getElementById("fallback-caption");
-  const expectedImgPath = document.getElementById("expected-img-path");
-  const artNote = document.getElementById("art-note");
-
-  const letterBadge = document.getElementById("letter-badge");
-  const wordTitle = document.getElementById("word-title");
-  const wordPhonetic = document.getElementById("word-phonetic");
-  const wordPos = document.getElementById("word-pos");
-  const wordMeaning = document.getElementById("word-meaning");
-
-  const playSource = document.getElementById("play-source");
-  const quoteEn = document.getElementById("quote-en");
-  const quoteZh = document.getElementById("quote-zh");
-  const wordCommentary = document.getElementById("word-commentary");
-  const audioStatus = document.getElementById("audio-status");
-  const progressIndicator = document.getElementById("progress-indicator");
+  const wordImageEl = document.getElementById("word-image");
+  const imageFallbackEl = document.getElementById("image-fallback");
+  const fallbackCaptionEl = document.getElementById("fallback-caption");
+  const expectedImgPathEl = document.getElementById("expected-img-path");
 
   const playWordBtn = document.getElementById("play-word-btn");
   const playQuoteBtn = document.getElementById("play-quote-btn");
   const prevBtn = document.getElementById("prev-btn");
   const nextBtn = document.getElementById("next-btn");
+  const progressIndicatorEl = document.getElementById("progress-indicator");
+  const audioStatusEl = document.getElementById("audio-status");
+  const audioPlayer = document.getElementById("audio-player");
 
-  // 1. 生成 A-Z 導覽列按鈕
-  function renderAlphabetNav() {
-    if (!alphabetList) return;
-    alphabetList.innerHTML = "";
+  let currentIndex = 0;
+  let activeAudioBtn = null;
+  let activeAudioType = null; // "word" 或 "quote"
+  let activeLabel = "";
+
+  // 恢復兩顆音檔按鈕為預設外觀
+  function resetAudioButtonsUI() {
+    playWordBtn.classList.remove("playing", "paused");
+    playWordBtn.innerHTML = `<span class="icon">🔊</span> 單字發音`;
+
+    playQuoteBtn.classList.remove("playing", "paused");
+    playQuoteBtn.innerHTML = `<span class="icon">🎙️</span> 朗讀金句`;
+  }
+
+  // 完全停止音檔（切換單字或翻頁時呼叫）
+  function stopCurrentAudio() {
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    audioPlayer.removeAttribute("src");
+    activeAudioBtn = null;
+    activeAudioType = null;
+    activeLabel = "";
+    resetAudioButtonsUI();
+  }
+
+  // 智慧切換播放 / 暫停 / 繼續接續播放
+  function toggleLocalAudio(type, primarySrc, fallbackSrc, buttonEl, label) {
+    // 情況 1：點擊的是「同一顆」正在播放或暫停中的按鈕 -> 執行暫停或繼續
+    if (activeAudioType === type && audioPlayer.src) {
+      if (!audioPlayer.paused) {
+        // 正在播放 -> 暫停
+        audioPlayer.pause();
+        buttonEl.classList.remove("playing");
+        buttonEl.classList.add("paused");
+        buttonEl.innerHTML = type === "quote"
+          ? `<span class="icon">▶</span> 繼續朗讀`
+          : `<span class="icon">▶</span> 繼續發音`;
+        audioStatusEl.textContent = `已暫停：${label}（再按一次繼續）`;
+      } else {
+        // 暫停中 -> 從原處接續播放
+        audioPlayer.play().then(() => {
+          buttonEl.classList.remove("paused");
+          buttonEl.classList.add("playing");
+          buttonEl.innerHTML = type === "quote"
+            ? `<span class="icon">⏸</span> 暫停朗讀`
+            : `<span class="icon">⏸</span> 暫停發音`;
+          audioStatusEl.textContent = `正在聆聽：${label}…`;
+        }).catch(() => {
+          stopCurrentAudio();
+        });
+      }
+      return;
+    }
+
+    // 情況 2：點擊的是新的音檔（或剛播完重新開始）
+    stopCurrentAudio();
+    activeAudioBtn = buttonEl;
+    activeAudioType = type;
+    activeLabel = label;
+
+    buttonEl.classList.add("playing");
+    buttonEl.innerHTML = type === "quote"
+      ? `<span class="icon">⏸</span> 暫停朗讀`
+      : `<span class="icon">⏸</span> 暫停發音`;
+    audioStatusEl.textContent = `正在聆聽：${label}…`;
+
+    audioPlayer.src = primarySrc;
+    audioPlayer.play().catch(() => {
+      if (fallbackSrc && fallbackSrc !== primarySrc) {
+        audioPlayer.src = fallbackSrc;
+        audioPlayer.play().catch(() => {
+          stopCurrentAudio();
+          audioStatusEl.textContent = `找不到音檔（${primarySrc} 或 ${fallbackSrc}），請確認檔案已上傳。`;
+        });
+      } else {
+        stopCurrentAudio();
+        audioStatusEl.textContent = `找不到音檔（${primarySrc}），請確認檔案已上傳。`;
+      }
+    });
+  }
+
+  // 音檔自然播放結束時，自動恢復按鈕狀態
+  audioPlayer.addEventListener("ended", () => {
+    stopCurrentAudio();
+    audioStatusEl.textContent = "";
+  });
+
+  function buildAlphabetNav() {
+    alphabetListEl.innerHTML = "";
     LEXICON_DATA.forEach((item, index) => {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "alphabet-btn";
+      btn.className = "alpha-btn";
       btn.textContent = item.letter;
-      btn.addEventListener("click", () => loadEntry(index));
-      alphabetList.appendChild(btn);
+      btn.title = `${item.letter} — ${item.word}`;
+      btn.dataset.index = index;
+      btn.addEventListener("click", () => switchToIndex(index));
+      alphabetListEl.appendChild(btn);
     });
   }
 
-  // 2. 載入指定字母的資料與油畫
-  function loadEntry(index) {
-    stopAudio();
-    currentIndex = index;
-    const item = LEXICON_DATA[index];
-    if (!item) return;
-
-    const letterLower = item.letter.toLowerCase();
-
-    if (alphabetList) {
-      const buttons = alphabetList.querySelectorAll("button");
-      buttons.forEach((btn, idx) => {
-        btn.classList.toggle("active", idx === index);
-      });
+  function switchToIndex(index) {
+    if (index === currentIndex && wordTitleEl.textContent === LEXICON_DATA[index].word) {
+      return;
     }
-
-    if (letterBadge) letterBadge.textContent = item.letter;
-    if (wordTitle) wordTitle.textContent = item.word;
-    if (wordPhonetic) wordPhonetic.textContent = item.phonetic;
-    if (wordPos) wordPos.textContent = item.pos;
-    if (wordMeaning) wordMeaning.textContent = item.meaning;
-    if (playSource) playSource.textContent = item.play;
-    if (quoteEn) quoteEn.textContent = item.quoteEn;
-    if (quoteZh) quoteZh.textContent = item.quoteZh;
-    if (wordCommentary) wordCommentary.textContent = item.commentary;
-    if (artNote) artNote.textContent = item.artCaption;
-    if (progressIndicator) progressIndicator.textContent = `${index + 1} / ${LEXICON_DATA.length}`;
-
-    if (wordImage) {
-      wordImage.classList.remove("hidden");
-      wordImage.style.display = "block";
-      if (imageFallback) imageFallback.classList.add("hidden");
-
-      const candidates = [
-        item.image,
-        `assets/images/${letterLower}.jpg`,
-        `assets/images/${letterLower}.png`,
-        `assets/images/${letterLower}.jpeg`,
-        `assets/images/${item.letter}.jpg`
-      ].filter(Boolean);
-
-      let tryIdx = 0;
-      wordImage.onerror = () => {
-        tryIdx++;
-        if (tryIdx < candidates.length) {
-          wordImage.src = candidates[tryIdx];
-        } else {
-          wordImage.onerror = null;
-          wordImage.style.display = "none";
-          if (imageFallback) {
-            imageFallback.classList.remove("hidden");
-            if (fallbackCaption) fallbackCaption.textContent = item.artCaption;
-            if (expectedImgPath) expectedImgPath.textContent = item.image;
-          }
-        }
-      };
-
-      wordImage.alt = item.artCaption;
-      wordImage.src = candidates[0];
-    }
-
-    if (audioStatus) {
-      audioStatus.textContent = `單字音檔：${item.wordAudio} ｜ 金句音檔：${item.quoteAudio}`;
-    }
+    lexiconCardEl.classList.add("fade-switch");
+    setTimeout(() => {
+      renderEntry(index);
+      lexiconCardEl.classList.remove("fade-switch");
+    }, 140);
   }
 
-  // 3. 停止播放音檔
-  function stopAudio() {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-      currentAudio = null;
-    }
-    if (playWordBtn) playWordBtn.classList.remove("playing");
-    if (playQuoteBtn) playQuoteBtn.classList.remove("playing");
-  }
+  function renderEntry(index) {
+    currentIndex = (index + LEXICON_DATA.length) % LEXICON_DATA.length;
+    const entry = LEXICON_DATA[currentIndex];
+    const lowerLetter = entry.letter.toLowerCase();
 
-  // 4. 僅播放您自己上傳的 MP3 音檔（不再觸發瀏覽器內建語音）
-  function playOwnMp3(type, triggerBtn) {
-    stopAudio();
-    const item = LEXICON_DATA[currentIndex];
-    if (!item) return;
+    stopCurrentAudio();
+    audioStatusEl.textContent = "";
 
-    const audioPath = type === "word" ? item.wordAudio : item.quoteAudio;
+    const alphaBtns = alphabetListEl.querySelectorAll(".alpha-btn");
+    alphaBtns.forEach((btn, idx) => {
+      btn.classList.toggle("active", idx === currentIndex);
+    });
 
-    if (triggerBtn) triggerBtn.classList.add("playing");
-    if (audioStatus) audioStatus.textContent = `正在載入您的音檔：${audioPath}...`;
+    letterBadgeEl.textContent = entry.letter;
+    wordTitleEl.textContent = entry.word;
+    wordPhoneticEl.textContent = entry.phonetic;
+    wordPosEl.textContent = entry.pos;
+    wordMeaningEl.textContent = entry.meaning;
+    playSourceEl.textContent = entry.play;
+    quoteEnEl.textContent = `“${entry.quoteEn}”`;
+    quoteZhEl.textContent = entry.quoteZh;
+    wordCommentaryEl.textContent = entry.commentary;
 
-    const audio = new Audio(audioPath);
-    currentAudio = audio;
+    artNoteEl.textContent = "";
+    artNoteEl.style.display = "none";
 
-    audio.onplaying = () => {
-      if (audioStatus) audioStatus.textContent = `正在播放您的音檔：${audioPath}`;
+    progressIndicatorEl.textContent = `FOLIO ${currentIndex + 1} / ${LEXICON_DATA.length}`;
+
+    const imgPath = entry.image || `assets/images/${lowerLetter}.jpg`;
+    imageFallbackEl.classList.add("hidden");
+    wordImageEl.style.display = "block";
+    wordImageEl.alt = `${entry.word} 印象派油畫`;
+
+    wordImageEl.onerror = () => {
+      wordImageEl.style.display = "none";
+      imageFallbackEl.classList.remove("hidden");
+      fallbackCaptionEl.textContent = entry.artCaption || entry.word;
+      expectedImgPathEl.textContent = imgPath;
+    };
+    wordImageEl.src = imgPath;
+
+    // 綁定智慧切換按鈕（播放 / 暫停 / 繼續）
+    playWordBtn.onclick = () => {
+      toggleLocalAudio(
+        "word",
+        `assets/audio/words/${lowerLetter}.mp3`,
+        entry.wordAudio,
+        playWordBtn,
+        `${entry.word} 單字發音`
+      );
     };
 
-    audio.onended = () => {
-      if (triggerBtn) triggerBtn.classList.remove("playing");
-      if (audioStatus) audioStatus.textContent = `播放完畢：${audioPath}`;
-      currentAudio = null;
+    playQuoteBtn.onclick = () => {
+      toggleLocalAudio(
+        "quote",
+        `assets/audio/quotes/${lowerLetter}_quote.mp3`,
+        entry.quoteAudio,
+        playQuoteBtn,
+        `《${entry.play}》金句朗讀`
+      );
     };
-
-    audio.onerror = () => {
-      if (triggerBtn) triggerBtn.classList.remove("playing");
-      if (audioStatus) audioStatus.textContent = `尚未放入音檔，請將 MP3 存為：${audioPath}`;
-      currentAudio = null;
-    };
-
-    audio.play().catch((err) => {
-      console.warn("音檔播放失敗：", err);
-      if (triggerBtn) triggerBtn.classList.remove("playing");
-      if (audioStatus) audioStatus.textContent = `找不到音檔：${audioPath}`;
-      currentAudio = null;
-    });
   }
 
-  // 5. 綁定按鈕事件
-  if (playWordBtn) playWordBtn.addEventListener("click", () => playOwnMp3("word", playWordBtn));
-  if (playQuoteBtn) playQuoteBtn.addEventListener("click", () => playOwnMp3("quote", playQuoteBtn));
+  prevBtn.addEventListener("click", () => switchToIndex(currentIndex - 1));
+  nextBtn.addEventListener("click", () => switchToIndex(currentIndex + 1));
 
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      loadEntry((currentIndex - 1 + LEXICON_DATA.length) % LEXICON_DATA.length);
-    });
-  }
+  // 鍵盤操作：左右方向鍵翻頁 + A-Z 字母跳轉 + 空白鍵暫停/繼續金句朗讀
+  document.addEventListener("keydown", (event) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
 
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      loadEntry((currentIndex + 1) % LEXICON_DATA.length);
-    });
-  }
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft" && prevBtn) prevBtn.click();
-    if (e.key === "ArrowRight" && nextBtn) nextBtn.click();
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      switchToIndex(currentIndex - 1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      switchToIndex(currentIndex + 1);
+    } else if (event.code === "Space") {
+      event.preventDefault();
+      if (activeAudioType === "word") {
+        playWordBtn.click();
+      } else {
+        playQuoteBtn.click();
+      }
+    } else if (/^[a-zA-Z]$/.test(event.key)) {
+      const targetLetter = event.key.toUpperCase();
+      const foundIndex = LEXICON_DATA.findIndex((item) => item.letter === targetLetter);
+      if (foundIndex !== -1) {
+        switchToIndex(foundIndex);
+      }
+    }
   });
 
-  renderAlphabetNav();
-  loadEntry(0);
+  buildAlphabetNav();
+  renderEntry(0);
 });
